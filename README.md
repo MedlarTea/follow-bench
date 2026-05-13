@@ -1,9 +1,5 @@
 # Follow-Bench
 
-> **Follow-Bench: A Unified Motion Planning Benchmark for Socially-Aware Robot Person Following**
->
-> Author: Hanjing YE
-
 `follow-bench` ships two Python packages:
 
 - **`socialRPF/`** — the planner / benchmark code
