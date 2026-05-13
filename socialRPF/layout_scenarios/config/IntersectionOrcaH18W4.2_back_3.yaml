@@ -1,0 +1,492 @@
+world:
+  height: 40.0
+  width: 40.0
+  step_time: 0.1
+  sample_time: 0.1
+  offset: [0, 0]
+  collision_mode: unobstructed_obstacles
+  control_mode: auto
+  mdownsample: 2
+  planner: {dialate: 10, skip_num: 5, smooth: False}
+
+robot:
+  - kinematics: {name: diff}
+    shape: {name: rectangle, length: 0.7, width: 0.55, wheelbase: 0.5}
+    state: [6.7, 20.0, 0.0]
+    vel_min: [-2.0, -3.141592653589793]
+    vel_max: [2.0, 3.141592653589793]
+    acce: [2.0, 3.141592653589793]
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    sensors:
+      - type: lidar2d
+        range_min: 0
+        range_max: 5
+        angle_range: 6.283185307179586
+        number: 200
+        noise: False
+        alpha: 0.3
+        build_map: True
+        map_resolution: 0.1
+
+target:
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [8.0, 20.0, 0.0]
+    goal: [38.5, 20.0, 0.0]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "orca",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      safe_dist: 0.4
+    }
+
+obstacle:
+  - shape: {name: rectangle, length: 17.9, width: 17.9}
+    state: [8.95, 31.05, 0]
+    color: darkgray
+  - shape: {name: rectangle, length: 17.9, width: 17.9}
+    state: [8.95, 8.95, 0]
+    color: darkgray
+  - shape: {name: rectangle, length: 17.9, width: 17.9}
+    state: [31.05, 8.95, 0]
+    color: darkgray
+  - shape: {name: rectangle, length: 17.9, width: 17.9}
+    state: [31.05, 31.05, 0]
+    color: darkgray
+
+eval:
+  init_recorder: True
+
+human:
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [20.59, 32.97, -1.159]
+    goal:
+      - [[20.59, 32.97, -1.159], [20.62, 3.65, 2.839]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "orca",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      safe_dist: 0.4
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [20.05, 37.24, -2.981]
+    goal:
+      - [[20.05, 37.24, -2.981], [20.18, 14.73, -1.061]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "orca",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      safe_dist: 0.4
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [20.33, 1.81, 0.888]
+    goal:
+      - [[20.33, 1.81, 0.888], [19.83, 31.97, 0.419]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "orca",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      safe_dist: 0.4
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [19.29, 4.44, 2.894]
+    goal:
+      - [[19.29, 4.44, 2.894], [20.12, 31.49, -2.135]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "orca",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      safe_dist: 0.4
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [2.13, 19.52, 1.155]
+    goal:
+      - [[2.13, 19.52, 1.155], [35.4, 20.46, -2.53]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "orca",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      safe_dist: 0.4
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [13.67, 20.34, 0.369]
+    goal:
+      - [[13.67, 20.34, 0.369], [30.57, 20.24, -0.693]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "orca",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      safe_dist: 0.4
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [36.52, 20.5, 2.122]
+    goal:
+      - [[36.52, 20.5, 2.122], [3.64, 20.22, 0.065]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "orca",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      safe_dist: 0.4
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [19.75, 34.18, 1.32]
+    goal:
+      - [[19.75, 34.18, 1.32], [19.19, 20.5, 2.539], [34.86, 20.29, -1.973]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "orca",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      safe_dist: 0.4
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [19.6, 30.83, -2.129]
+    goal:
+      - [[19.6, 30.83, -2.129], [19.08, 18.91, -2.581], [11.4, 19.52, -2.275]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "orca",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      safe_dist: 0.4
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [20.73, 28.32, -0.601]
+    goal:
+      - [[20.73, 28.32, -0.601], [21.03, 19.78, -2.464], [3.42, 20.06, -1.912]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "orca",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      safe_dist: 0.4
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [19.7, 2.92, -0.365]
+    goal:
+      - [[19.7, 2.92, -0.365], [19.84, 20.32, 2.671], [4.28, 19.66, -2.819]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "orca",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      safe_dist: 0.4
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [19.85, 7.89, 1.144]
+    goal:
+      - [[19.85, 7.89, 1.144], [19.09, 20.54, -1.135], [0.78, 20.37, -3.016]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "orca",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      safe_dist: 0.4
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [1.1, 20.84, 0.04]
+    goal:
+      - [[1.1, 20.84, 0.04], [19.99, 20.97, 1.291], [20.89, 35.58, -1.107]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "orca",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      safe_dist: 0.4
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [4.27, 20.51, -0.571]
+    goal:
+      - [[4.27, 20.51, -0.571], [20.02, 20.64, -1.107], [20.22, 26.76, 0.171]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "orca",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      safe_dist: 0.4
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [12.2, 20.08, -0.181]
+    goal:
+      - [[12.2, 20.08, -0.181], [20.27, 20.06, 0.519], [20.98, 31.41, 1.806]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "orca",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      safe_dist: 0.4
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [10.44, 19.58, -0.169]
+    goal:
+      - [[10.44, 19.58, -0.169], [19.9, 21.1, 2.895], [19.79, 11.45, 1.832]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "orca",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      safe_dist: 0.4
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [27.2, 19.73, -1.548]
+    goal:
+      - [[27.2, 19.73, -1.548], [18.93, 20.85, -0.978], [19.13, 28.98, 2.433]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "orca",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      safe_dist: 0.4
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [36.9, 19.31, 0.776]
+    goal:
+      - [[36.9, 19.31, 0.776], [19.87, 20.15, 2.976], [20.75, 26.86, 0.353]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "orca",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      safe_dist: 0.4
+    }

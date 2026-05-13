@@ -1,0 +1,940 @@
+world:
+  height: 30
+  width: 30
+  step_time: 0.1
+  sample_time: 0.1
+  offset: [0, 0]
+  collision_mode: unobstructed_obstacles
+  control_mode: auto
+  mdownsample: 2
+  planner: {dialate: 10, skip_num: 5, smooth: false}
+
+robot:
+  - kinematics: {name: diff}
+    shape: {name: rectangle, length: 0.7, width: 0.55, wheelbase: 0.5}
+    state: [6.5, 15, 0]
+    vel_min: [-2.0, -3.141592653589793]
+    vel_max: [2.0, 3.141592653589793]
+    acce: [2.0, 3.141592653589793]
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    sensors:
+      - type: lidar2d
+        range_min: 0
+        range_max: 5
+        angle_range: 6.283185307179586
+        number: 200
+        noise: False
+        alpha: 0.3
+        build_map: True
+        map_resolution: 0.1
+
+target:
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [8, 15, 0]
+    goal: [28, 15, 0]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: true
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: true
+      show_goal: false
+      show_trail: true
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7.0,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+
+eval:
+  init_recorder: True
+
+human:
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [15.66, 17.21, -3.142]
+    goal:
+      - [[15.66, 17.21, -3.142], [7.81, 17.21, -3.142]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [17.62, 19.32, -3.142]
+    goal:
+      - [[17.62, 19.32, -3.142], [5.03, 19.32, -3.142]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [18.54, 17.03, 0.0]
+    goal:
+      - [[18.54, 17.03, 0.0], [24.81, 17.03, 0.0]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [11.18, 19.25, 0.0]
+    goal:
+      - [[11.18, 19.25, 0.0], [21.37, 19.25, 0.0]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [11.79, 16.7, 0.0]
+    goal:
+      - [[11.79, 16.7, 0.0], [17.27, 16.7, 0.0]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [14.73, 16.43, 0.0]
+    goal:
+      - [[14.73, 16.43, 0.0], [29.39, 16.43, 0.0]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [16.47, 16.02, -3.142]
+    goal:
+      - [[16.47, 16.02, -3.142], [2.99, 16.02, -3.142]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [14.83, 18.32, -3.142]
+    goal:
+      - [[14.83, 18.32, -3.142], [4.62, 18.32, -3.142]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [12.72, 18.09, -3.142]
+    goal:
+      - [[12.72, 18.09, -3.142], [5.62, 18.09, -3.142]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [13.51, 15.74, -3.142]
+    goal:
+      - [[13.51, 15.74, -3.142], [2.68, 15.74, -3.142]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [13.98, 19.19, 0.0]
+    goal:
+      - [[13.98, 19.19, 0.0], [20.28, 19.19, 0.0]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [16.4, 19.06, 0.0]
+    goal:
+      - [[16.4, 19.06, 0.0], [26.98, 19.06, 0.0]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [17.0, 17.93, -3.142]
+    goal:
+      - [[17.0, 17.93, -3.142], [2.12, 17.93, -3.142]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [18.55, 15.78, -3.142]
+    goal:
+      - [[18.55, 15.78, -3.142], [15.51, 15.78, -3.142]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [12.39, 19.29, 0.0]
+    goal:
+      - [[12.39, 19.29, 0.0], [16.26, 19.29, 0.0]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [13.46, 10.8, -3.142]
+    goal:
+      - [[13.46, 10.8, -3.142], [9.52, 10.8, -3.142]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [11.81, 12.59, -3.142]
+    goal:
+      - [[11.81, 12.59, -3.142], [8.24, 12.59, -3.142]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [15.12, 11.42, -3.142]
+    goal:
+      - [[15.12, 11.42, -3.142], [3.13, 11.42, -3.142]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [19.28, 12.13, 0.0]
+    goal:
+      - [[19.28, 12.13, 0.0], [24.09, 12.13, 0.0]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [11.83, 10.64, 0.0]
+    goal:
+      - [[11.83, 10.64, 0.0], [24.57, 10.64, 0.0]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [18.42, 14.34, -3.142]
+    goal:
+      - [[18.42, 14.34, -3.142], [16.09, 14.34, -3.142]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [18.17, 10.71, 0.0]
+    goal:
+      - [[18.17, 10.71, 0.0], [21.38, 10.71, 0.0]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [13.43, 13.37, 0.0]
+    goal:
+      - [[13.43, 13.37, 0.0], [23.83, 13.37, 0.0]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [10.84, 11.57, -3.142]
+    goal:
+      - [[10.84, 11.57, -3.142], [4.09, 11.57, -3.142]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [14.97, 14.18, -3.142]
+    goal:
+      - [[14.97, 14.18, -3.142], [10.9, 14.18, -3.142]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [17.15, 13.5, 0.0]
+    goal:
+      - [[17.15, 13.5, 0.0], [26.04, 13.5, 0.0]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [15.83, 12.64, 0.0]
+    goal:
+      - [[15.83, 12.64, 0.0], [21.23, 12.64, 0.0]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [16.83, 11.47, 0.0]
+    goal:
+      - [[16.83, 11.47, 0.0], [19.3, 11.47, 0.0]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [13.03, 12.19, -3.142]
+    goal:
+      - [[13.03, 12.19, -3.142], [6.92, 12.19, -3.142]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }
+  - kinematics: {name: omni}
+    shape: {name: circle, radius: 0.3}
+    state: [19.28, 13.37, -3.142]
+    goal:
+      - [[19.28, 13.37, -3.142], [7.02, 13.37, -3.142]]
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    plan_path: True
+    goal_threshold: 2.0
+    state_dim: 3
+    plot:
+      show_trajectory: True
+      show_goal: False
+      show_trail: True
+      keep_trail_length: 10
+      keep_traj_length: 10
+    behavior: {
+      name: "sfm",
+      vxmax: 1.5,
+      vymax: 1.5,
+      acceler: 1.0,
+      gain_k: 1.5,
+      gain_a_static: 5.0,
+      gain_b_static: 0.25,
+      gain_a_agent: 7,
+      gain_b_agent: 0.3,
+      avoid_dis: 5.0,
+      safe_dist: 0.5
+    }

@@ -1,0 +1,69 @@
+dynamics_type: 'diff' # diff, omni
+contrl_type: 1 # 1, 2
+
+# Obstacle avoidance
+## Obstacle detection range [m]
+detection_range: [0.1, 5]
+## Minimal distance between two obstacles [m]
+obs_sparsity_threshold: 0.5
+# Person_Name: "actor1"
+# Robot_Name: "turtlebot3"
+
+# For MPC 
+
+## Max velocities [m/s]
+max_vx: 2.0
+max_vy: 1.0
+max_va: 2.0
+
+# ## Max accelerations [m/s^2]
+max_ax: 1.0
+max_ay: 1.0
+max_aa: 1.0
+
+NT: 40
+NX: 3 
+NU: 2 
+DT: 0.1
+
+# CBF
+N_CBF: 8
+gamma_k: 0.2
+safe_distance: 0.3  # 0.3 original
+omega: 0.5
+sigma: 0.2
+
+# larger values, more important
+# for last terminal cost
+P: 
+  - 15  # x   original: [30 30 20]
+  - 15  # y
+  - 10  # theta
+
+# for state difference costs
+Q: 
+  - 15.0  # x   original: [10.0 10.0 5.0]
+  - 15.0  # y
+  - 10.0  # theta
+
+### For control ###
+# for control costs
+R: 
+  - 10.0   # vx   original: 5.0
+  - 8  # omega original: 2.5
+# for control change penalty
+R_d: 
+  - 10.0  # original: 4.0
+  - 8   # original: 2.5
+
+tictoc: True
+
+
+# Default settings for the numerical optimization solver.
+# Do not change this unless you know what you are doing. 
+plan_solver_config: 
+  ipopt.max_iter: 200 
+  ipopt.print_level: 0 
+  print_time: 0 
+  ipopt.acceptable_tol: 1.0e-3 
+  ipopt.acceptable_obj_change_tol: 1.0e-3 

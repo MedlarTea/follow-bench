@@ -1,0 +1,78 @@
+world:
+  height: 10  # the height of the world
+  width: 10   # the width of the world
+  step_time: 0.1  # 10Hz calculate each step
+  sample_time: 0.1  # 10 Hz for render and data extraction 
+  offset: [0, 0] # the offset of the world on x and y 
+  collision_mode: 'unobstructed_obstacles'  # 'stop', 'unobstructed', 'reactive'
+
+robot:
+  - kinematics: {name: 'omni'}  # omni, diff, acker
+    shape: {name: 'circle', radius: 0.3}  # radius
+    # shape: {name: 'rectangle', length: 0.3, width: 1.0} 
+    state: [1, 1, 0]  
+    goal: [9, 9, 0] 
+    # acce: [3, .inf]   # acce of [linear, angular]  or [v_x, v_y] or [linear, steer]
+    behavior: {name: 'rvo'} # move toward to the goal directly 
+    # color: 'g'
+    state_dim: 3
+    plot:
+      show_trajectory: True
+
+human:
+  - kinematics: {name: 'omni'}  # omni, diff, acker
+    shape: {name: 'circle', radius: 0.3}  # radius
+    # shape: {name: 'rectangle', length: 0.3, width: 1.0} 
+    state: [2, 1, 0]  
+    goal:
+    - [[2, 1, 0], [4, 1, 0], [4, 3, 0], [2, 3, 0], [2, 1, 0]]
+    # acce: [3, .inf]   # acce of [linear, angular]  or [v_x, v_y] or [linear, steer]
+    behavior: {name: 'rvo'} # move toward to the goal directly 
+    state_dim: 3
+    plot:
+      show_trajectory: True
+
+
+# robot:
+#   - number: 2
+#     distribution: {name: 'manual'}
+#     kinematics:
+#     - {name: 'omni'}  # omni, diff, acker
+#     - {name: 'omni'}  # omni, diff, acker
+#     shape: {name: 'circle', radius: 0.3}  # radius
+#     # shape: {name: 'rectangle', length: 0.5, width: 0.2}  # radius
+#     state: 
+#       - [1, 1, 0]  
+#       - [2, 1, 0]
+#     goal:
+#       - [8, 8, 0] 
+#       - [[2, 1, 0], [4, 1, 0], [4, 3, 0], [2, 3, 0], [2, 1, 0]]
+#       # - [9 ,9, 0]
+#     # acce: [3, .inf]   # acce of [linear, angular]  or [v_x, v_y] or [linear, steer]
+#     behavior: 
+#       - {name: 'rvo'} # move toward to the goal directly 
+#       - {name: 'rvo'}
+#     color: 
+#       - 'royalblue'
+#       - 'red'
+#     state_dim: 3  # important for omni kinematics!!!
+#     plot:
+#       show_text: True
+      
+
+# obstacle:
+#   - kinematics: {name: 'omni'}
+#     behavior: {name: 'dash'}
+#     shape: {name: 'circle', radius: 0.3}  # radius
+#     state: [2, 2, 0]
+#     goal: [4, 2, 0]
+    # - [[4, 2, 0], [4, 4, 0], [2, 4, 0] [2, 2, 0]]
+  
+  # - shape: {name: 'rectangle', length: 1.5, width: 1.2}  # radius
+  #   state: [6, 5, 1] 
+
+  # - shape: {name: 'linestring', vertices: [[5, 5], [4, 0], [1, 6]] }  # vertices
+  #   state: [0, 0, 0] 
+  #   unobstructed: True
+  #   plot:
+  #     obj_linestyle: '--'

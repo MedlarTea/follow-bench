@@ -1,0 +1,53 @@
+world:
+  height: 30              # the height of the world
+  width: 30               # the width of the world
+  step_time: 0.1          # 10Hz calculate each step
+  sample_time: 0.1        # 10 Hz for render and data extraction 
+  offset: [0, 0]          # the offset of the world on x and y 
+  collision_mode: 'unobstructed_obstacles'  # 'stop', 'unobstructed', 'reactive', 'unobstructed_obstacles'
+  control_mode: 'auto'  # 'keyboard', 'auto'
+  mdownsample: 2  # grid map downsample (if 2, resolution=2/10=0.2)
+  planner: {dialate: 10, skip_num: 5, smooth: False}  # dialate (unit-grid-level)
+
+robot:
+  - kinematics: {name: 'diff'} 
+    shape: {name: 'rectangle', length: 0.70, width: 0.55, wheelbase: 0.5}
+    # shape: {name: 'circle', radius: 0.3}  # radius
+    state: [5, 12, 0] 
+    goal: [40, 40, 0] 
+    vel_min: [-2.0, -3.141592653589793]
+    vel_max: [2.0, 3.141592653589793]
+    acce: [2.0, 3.141592653589793]
+    goal_threshold: 0.03
+    state_dim: 3 
+    plot:
+      show_trail: True
+      show_goal: False
+
+    sensors: 
+      - type: 'lidar2d'
+        range_min: 0
+        range_max: 5
+        angle_range: 6.2831852
+        number: 200
+        noise: False
+        alpha: 0.3
+        ### RA-Bench ###
+        build_map: True  # for visible human identification
+        map_resolution: 0.1
+        ### RA-Bench ###
+
+target:
+  - kinematics: {name: 'omni'}  # omni, diff, acker
+    shape: {name: 'circle', radius: 0.3}
+    vel_min: [-1.5, -1.5]
+    vel_max: [1.5, 1.5]
+    # acce: [1.5, 1.5]
+    state: [5, 10, 0]
+    goal:
+    - [[5, 10, 0], [25, 10, 0], [5, 24, 0]]
+    behavior: {name: orca, vxmax: 1.5, vymax: 1.5, acceler: 1.5, safe_dist: 0.4}
+    state_dim: 3
+    plot:
+      show_trajectory: True
+

@@ -1,0 +1,71 @@
+world:
+  height: 50  # the height of the world
+  width: 50   # the width of the world
+  step_time: 0.1  # 10Hz calculate each step
+  sample_time: 0.1  # 10 Hz for render and data extraction 
+  offset: [0, 0] # the offset of the world on x and y 
+  collision_mode: 'stop'  # 'stop', 'unobstructed', 'reactive'
+  control_mode: 'auto'  # 'keyboard', 'auto'
+  planner: {dialate: 10, skip_num: 5, smooth: False}  # dialate (unit-grid-level)
+  obstacle_map: 'cave.png'
+  mdownsample: 2
+  dialate: 10  # grid-level
+  skip_num: 10
+
+robot:
+  - kinematics: {name: 'omni'}  # omni, diff, acker
+    # shape: {name: 'rectangle', length: 4.6, width: 1.6, wheelbase: 3}
+    shape: {name: 'circle', radius: 0.5}  # radius
+    state: [5, 5, 0]
+    goal: [40, 40, 0]
+    plan_path: True
+    goal_threshold: 2.0
+    vel_max: [4, 4]
+    behavior: {name: 'orca'} # rvo dash sfm orca
+    state_dim: 3  # must exist for omni kinematics
+    plot:
+      show_trail: True
+      traj_color: 'g'
+      show_trajectory: True
+      show_goal: True
+    sensors: 
+      - type: 'lidar2d'
+        range_min: 0
+        range_max: 20
+        angle_range: 3.14
+        number: 100
+        noise: False
+        std: 1   
+        angle_std: 0.2
+        offset: [0, 0, 0]
+        alpha: 0.4
+
+human:
+  - kinematics: {name: 'omni'}  # omni, diff, acker
+    shape: {name: 'circle', radius: 0.3}  # radius
+    # shape: {name: 'rectangle', length: 0.3, width: 1.0} 
+    state: [40, 40, 0] 
+    goal: [5, 5, 0]
+    plan_path: True
+    goal_threshold: 2.0
+    # acce: [3, .inf]   # acce of [linear, angular]  or [v_x, v_y] or [linear, steer]
+    behavior: {name: 'orca'} # move toward to the goal directly 
+    state_dim: 3
+    plot:
+      show_trajectory: True
+
+# obstacle:
+  # - number: 10
+  #   distribution: {name: 'manual'}
+  #   shape:
+  #     - {name: 'polygon', random_shape: true, center_range: [5, 10, 40, 30], avg_radius_range: [0.5, 2]}  # radius
+  
+  # - shape: {name: 'circle', radius: 1.0}  # radius
+  #   state: [6, 10, 0] 
+  
+  # - shape: {name: 'linestring', vertices: [[7, 4], [7, 20]] }  # vertices
+  #   state: [0, 0, 0] 
+  #   unobstructed: True
+  #   plot:
+  #     obj_linestyle: '--'
+
