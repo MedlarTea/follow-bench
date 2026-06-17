@@ -1,0 +1,1001 @@
+"""
+Class EnvBase is the base class of the environment. This class will read the yaml file and create the world, robot, obstacle, and map objects.
+
+Author: Ruihua Han (hanrh@connect.hku.hk)
+"""
+
+import os
+import matplotlib
+
+requested_backend = os.environ.get("MPLBACKEND")
+if requested_backend:
+    matplotlib.use(requested_backend)
+else:
+    try:
+        matplotlib.use("TkAgg")
+    except Exception as e:
+        print(f"Failed to use 'TkAgg' backend: {e}")
+        print("Falling back to 'Agg' backend.")
+        matplotlib.use("Agg")
+
+
+from irsim.env.env_config import EnvConfig
+from irsim.world import World
+from .env_plot import EnvPlot
+from irsim.global_param import world_param, env_param
+from irsim.world.object_factory import ObjectFactory
+from matplotlib import pyplot as plt
+import platform
+import numpy as np
+from .env_logger import EnvLogger
+from irsim.lib import random_generate_polygon
+from shapely import Polygon
+from typing import Optional
+import importlib
+from irsim.world import ObjectBase
+from tabulate import tabulate
+
+from irsim.lib.algorithm.a_star import AStar
+from irsim.util.util import xy_to_coord, coord_to_xy
+
+from .env_eval import EnvEval
+import cv2
+
+try:
+    from pynput import keyboard
+
+    keyboard_module = True
+except ImportError:
+    keyboard_module = False
+
+
+class EnvBase:
+    """
+    The base class of environment. This class will read the yaml file and create the world, robot, obstacle, and map objects.
+
+    Args:
+        world_name (str): Path to the world yaml file.
+        display (bool): Flag to display the environment.
+        disable_all_plot (bool): Flag to disable all plots and figures.
+        save_ani (bool): Flag to save the animation.
+        full (bool): Flag to full screen the figure.
+        log_file (str): Name of the log file.
+        log_level (str): Level of the log output.
+    """
+
+    def __init__(
+        self,
+        world_name: Optional[str] = None,
+        display: bool = True,
+        disable_all_plot: bool = False,
+        save_ani: bool = False,
+        full: bool = False,
+        log_file: Optional[str] = None,
+        log_level: str = "INFO",
+        eval_dir: str = "",
+    ) -> None:
+
+        # init env setting
+        self.display = display
+        self.disable_all_plot = disable_all_plot
+        self.save_ani = save_ani
+        self.logger = EnvLogger(log_file, log_level)
+        env_param.logger = self.logger
+
+        self.env_config = EnvConfig(world_name)
+        object_factory = ObjectFactory()
+        # init objects (world, obstacle, robot)
+
+        self._world = World(world_name, **self.env_config.parse["world"])
+
+        # init objects
+        self._robot_collection = object_factory.create_from_parse(
+            self.env_config.parse["robot"], "robot"
+        )
+        self._obstacle_collection = object_factory.create_from_parse(
+            self.env_config.parse["obstacle"], "obstacle"
+        )
+        self._human_collection = object_factory.create_from_parse(
+            self.env_config.parse["human"], "human"
+        )
+        self._target_collection = object_factory.create_from_parse(
+            self.env_config.parse["target"], "target"
+        )
+        self._map_collection = object_factory.create_from_map(
+            self._world.obstacle_positions, self._world.buffer_reso
+        )
+
+        self._objects = self._robot_collection + self._obstacle_collection + self._target_collection + self._human_collection + self._map_collection
+
+        # init path planner
+        print("[ENV] init grid map") 
+        if self._world.grid_map is not None:
+            env_param.gm_size = [self._world.grid_map.shape[0], self._world.grid_map.shape[1]]
+            env_param.gm_res = self._world.buffer_reso
+            grid_map_for_panner = self._generate_gm_for_planning(self._world.grid_map, self._obstacle_collection)
+
+            # grid_img = cv2.rotate(grid_map_for_panner, cv2.ROTATE_90_COUNTERCLOCKWISE) * 255
+            # cv2.imwrite("/home/hjyeee/grid_map.png", grid_img)
+
+            self.path_planner = AStar(
+                grid_map_for_panner,
+                dialate=self.env_config.parse["world"]["planner"]["dialate"],
+                skip_num=self.env_config.parse["world"]["planner"]["skip_num"],
+                smooth=self.env_config.parse["world"]["planner"]["smooth"],
+                viz=False
+            )
+
+            # grid map origin and x-y plane origin is the same!
+            env_param.planner = self.path_planner
+            print("[GRID MAP SIZE]", env_param.gm_size)
+            print("[GRID MAP RES]", env_param.gm_res)
+
+            for obj in self._objects:
+                obj.init_path_goal()
+
+        # env parameters
+        self._env_plot = EnvPlot(
+            self._world.grid_map,
+            self.objects,
+            self._world.x_range,
+            self._world.y_range,
+            **self.env_config.parse["plot"],
+        )
+
+        if eval_dir != "":
+            self._env_eval = EnvEval(
+                eval_dir,
+                self._world.grid_map,
+                self.objects
+            )
+
+        
+
+        env_param.objects = self.objects
+
+        if world_param.control_mode == "keyboard":
+            if not keyboard_module:
+                self.logger.error(
+                    "Keyboard module is not installed. Auto control applied. Please install pynput by 'pip install pynput'."
+                )
+                world_param.control_mode = "auto"
+            else:
+                self.init_keyboard(self.env_config.parse["keyboard"])
+
+        if full:
+            system_platform = platform.system()
+            if system_platform == "Linux":
+                plt.get_current_fig_manager().full_screen_toggle()
+
+            elif system_platform == "Windows":
+                mng = plt.get_current_fig_manager()
+                mng.full_screen_toggle()
+
+    def __del__(self):
+        # env_param.objects = []
+
+        print(
+            "INFO: Simulated Environment End with sim time elapsed: {} seconds".format(
+                round(self._world.time, 2)
+            )
+        )
+    
+    def __str__(self):
+        return f"Environment: {self._world.name}"
+
+    def step(self, action: Optional[np.ndarray] = None, action_id=0):
+        """
+        Perform a simulation step in the environment.
+
+        Args:
+            action (list or numpy array 2*1): Action to be performed in the environment.
+
+                - differential robot action:  linear velocity, angular velocity
+                - omnidirectional robot action: v_x -- velocity in x; v_y -- velocity in y
+                - Ackermann robot action: linear velocity, Steering angle
+
+            action_id (int): Apply the action to the robot with the given id.
+        """
+
+        if isinstance(action, list):
+            self._objects_step(action)
+        else:
+            if world_param.control_mode == "keyboard":
+                self._object_step(self.key_vel, self.key_id)
+            else:
+                self._object_step(action, action_id)
+
+        self._world.step()
+
+    def _generate_gm_for_planning(self, grid_map, obstacles):
+        grid_map_for_panner = grid_map.copy()
+        grid_map_for_panner = grid_map_for_panner.astype(np.uint8)
+        print("[LEN]", len(obstacles))
+        if len(obstacles) != 0:
+            for obstacle in obstacles:
+                x = obstacle.state[0, 0]
+                y = obstacle.state[1, 0]
+                cx, cy = xy_to_coord([x, y], env_param.gm_res, env_param.gm_size)
+                if obstacle.shape == "circle":
+                    grid_map_for_panner = cv2.circle(grid_map_for_panner, (cy, cx), int(obstacle.radius/env_param.gm_res), 100, thickness=-1)
+                elif obstacle.shape == "polygon" or obstacle.shape == "rectangle":
+                    coords = []
+                    # print(obstacle.vertices.shape)
+                    for vertices in obstacle.vertices.T:
+                        coords.append(xy_to_coord(vertices, env_param.gm_res, env_param.gm_size))
+                    grid_map_for_panner = cv2.fillPoly(grid_map_for_panner, [np.array(coords)[:,::-1]], 100)
+                elif obstacle.shape == "linestring":
+                    x0y0 = obstacle.vertices.T[0]
+                    x0y0_coord = xy_to_coord(x0y0, env_param.gm_res, env_param.gm_size)
+                    x1y1 = obstacle.vertices.T[1]
+                    x1y1_coord = xy_to_coord(x1y1, env_param.gm_res, env_param.gm_size)
+                    xmin = max(0, x0y0_coord[0]-1)
+                    xmax = min(env_param.gm_size[0]-1, x1y1_coord[0]+1)
+                    ymin = max(0, x0y0_coord[1]-1)
+                    ymax = min(env_param.gm_size[1]-1, x1y1_coord[1]+1)
+                    # print("x0y0_coord", x0y0_coord)
+                    # print("x1y1_coord", x1y1_coord)
+                    grid_map_for_panner[xmin:xmax, ymin:ymax] = 100
+                    # print("[Linestring]: {}".format(self.vertices))
+                    # pass
+        
+        grid_map_for_panner[grid_map_for_panner==100.0] = 1
+        
+        return grid_map_for_panner
+
+    def _objects_step(self, action: Optional[list] = None):
+        action = action + [None] * (len(self.objects) - len(action))
+        [obj.step(action) for obj, action in zip(self.objects, action)]
+
+    def _object_step(self, action: np.ndarray, obj_id: int = 0):
+        self.objects[obj_id].step(action)
+        [obj.step() for obj in self.objects if obj._id != obj_id]
+
+    # render
+    def render(self, interval: float = 0.05, figure_kwargs=dict(), **kwargs):
+        """
+        Render the environment.
+
+        Args:
+            interval(float) :  Time interval between frames in seconds.
+            figure_kwargs(dict) : Additional keyword arguments for saving figures, see `savefig <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.savefig.html>`_ for detail.
+            kwargs: Additional keyword arguments for drawing components. see :py:meth:`.ObjectBase.plot` function for detail.
+        """
+
+        if not self.disable_all_plot:
+            if self._world.sampling:
+
+                if self.display:
+                    plt.pause(interval)
+
+                if self.save_ani:
+                    self.save_figure(save_gif=True, **figure_kwargs)
+
+                self._env_plot.clear_components("dynamic", self.objects)
+                self._env_plot.draw_components("dynamic", self.objects, **kwargs)
+
+    def show(self):
+        """
+        Show the environment figure.
+        """
+
+        self._env_plot.show()
+
+    def record(self, alg_cost_t=0.0):
+        """record necessary information for RA evaluation
+        
+        """
+        self._env_eval.record(self.objects, alg_cost_t)
+    
+    def eval(self, max_steps=400, max_search_steps=100):
+        """conduct evaluation based on the recorded results
+        
+        """
+        self._env_eval.eval(max_steps, max_search_steps)
+
+    # draw various components
+    def draw_trajectory(self, traj: list, traj_type: str = "g-", **kwargs):
+        """
+        Draw the trajectory on the environment figure.
+
+        Args:
+            traj (list): List of trajectory points (2 * 1 vector).
+            traj_type: Type of the trajectory line, see matplotlib plot function for detail.
+            **kwargs: Additional keyword arguments for drawing the trajectory, see :py:meth:`.EnvPlot.draw_trajectory` for detail.
+        """
+
+        self._env_plot.draw_trajectory(traj, traj_type, **kwargs)
+
+    def draw_points(self, points: list, s: int = 30, c: str = "b", refresh: bool = True, **kwargs):
+        """
+        Draw points on the environment figure.
+
+        Args:
+            points (list): List of points (2*1) to be drawn.
+                or (np.array): (2, Num) to be drawn.
+            s (int): Size of the points.
+            c (str): Color of the points.
+            refresh (bool): Flag to refresh the points in the figure.
+            **kwargs: Additional keyword arguments for drawing the points, see `ax.scatter <https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.scatter.html>`_ function for detail.
+        """
+
+        self._env_plot.draw_points(points, s, c, refresh, **kwargs)
+
+    def draw_box(self, vertex: list, refresh: bool = True, color: str = "-b"):
+        """
+        Draw a box by the vertices.
+
+        Args:
+            vertices: matrix of vertices, point_dim*vertex_num
+            refresh: whether to refresh the plot, default False
+            color: color of the box, default 'b-'
+        """
+        self._env_plot.draw_box(vertex, refresh, color)
+
+    # keyboard control
+    def init_keyboard(self, keyboard_kwargs: dict = dict()):
+        """
+        Initialize keyboard control for the environment.
+
+        Args:
+            keyboard_kwargs (dict): Dictionary of keyword arguments for keyboard control settings
+
+                - vel_max (list): Maximum velocities [linear, angular]. Default is [3.0, 1.0].
+
+                - key_lv_max (float): Maximum linear velocity. Default is vel_max [0].
+
+                - key_ang_max (float): Maximum angular velocity. Default is vel_max [1].
+
+                - key_lv (float): Initial linear velocity. Default is 0.0.
+
+                - key_ang (float): Initial angular velocity. Default is 0.0.
+
+                - key_id (int): Initial robot control ID. Default is 0.
+
+            Keys:
+                - w: Move forward.
+                - s: Move backward.
+                - a: Turn left.
+                - d: Turn right.
+                - q: Decrease linear velocity.
+                - e: Increase linear velocity.
+                - z: Decrease angular velocity.
+                - c: Increase angular velocity.
+                - alt + num: Change the current control robot id.
+                - r: Reset the environment.
+        """
+
+        vel_max = keyboard_kwargs.get("vel_max", [3.0, 1.0])
+        self.key_lv_max = keyboard_kwargs.get("key_lv_max", vel_max[0])
+        self.key_ang_max = keyboard_kwargs.get("key_ang_max", vel_max[1])
+        self.key_lv = keyboard_kwargs.get("key_lv", 0.0)
+        self.key_ang = keyboard_kwargs.get("key_ang", 0.0)
+        self.key_id = keyboard_kwargs.get("key_id", 0)
+        self.alt_flag = 0
+
+        if "s" in plt.rcParams["keymap.save"]:
+            plt.rcParams["keymap.save"].remove("s")
+
+        if "q" in plt.rcParams["keymap.quit"]:
+            plt.rcParams["keymap.quit"].remove("q")
+
+        self.key_vel = np.zeros((2, 1))
+
+        self.logger.info("start to keyboard control")
+
+        commands = [
+            ["w", "forward"],
+            ["s", "back forward"],
+            ["a", "turn left"],
+            ["d", "turn right"],
+            ["q", "decrease linear velocity"],
+            ["e", "increase linear velocity"],
+            ["z", "decrease angular velocity"],
+            ["c", "increase angular velocity"],
+            ["alt+num", "change current control robot id"],
+            ["r", "reset the environment"],
+        ]
+        # headers = ["key", "function"]
+
+        headers = ["Key", "Function"]
+        # Generate the table using tabulate
+        table = tabulate(commands, headers=headers, tablefmt="grid")
+        print(table)
+
+        self.listener = keyboard.Listener(
+            on_press=self._on_press, on_release=self._on_release
+        )
+        self.listener.start()
+
+    def end(self, ending_time: float = 3.0, **kwargs):
+        """
+        End the simulation, save the animation, and close the environment.
+
+        Args:
+            ending_time (float): Time in seconds to wait before closing the figure, default is 3 seconds.
+            **kwargs: Additional keyword arguments for saving the animation, see :py:meth:`.EnvPlot.save_animate` for detail.
+        """
+
+        if self.disable_all_plot:
+            return
+
+        if self.save_ani:
+            self._env_plot.save_animate(**kwargs)
+
+        if self.display:
+            plt.pause(ending_time)
+            self.logger.info(f"Figure will be closed within {ending_time:.2f} seconds.")
+
+        plt.close("all")
+        env_param.objects = []
+        ObjectBase.reset_id_iter()
+
+        if world_param.control_mode == "keyboard":
+            self.listener.stop()
+
+    def done(self, mode: str = "all"):
+        """
+        Check if the simulation is done.
+
+        Args:
+            mode (str): Mode to check if all or any of the objects are done.
+
+                - all (str): Check if all objects are done.
+                - any (str): Check if any of the objects are done.
+        """
+
+        done_list = [obj.done() for obj in self.objects if obj.role == "robot"]
+
+        if len(done_list) == 0:
+            return False
+
+        if mode == "all":
+            return all(done_list)
+        elif mode == "any":
+            return any(done_list)
+
+    def reset(self):
+        """
+        Reset the environment.
+        """
+
+        self._reset_all()
+        self.step(action=np.zeros((2, 1)))
+        self._world.reset()
+        self.reset_plot()
+
+    def _reset_all(self):
+        [obj.reset() for obj in self.objects]
+
+    def reset_plot(self):
+        """
+        Reset the environment figure.
+        """
+
+        plt.cla()
+        self._env_plot.init_plot(self._world.grid_map, self.objects)
+
+    # region: environment change
+    def random_obstacle_position(
+        self,
+        range_low: list = [0, 0, -3.14],
+        range_high: list = [10, 10, 3.14],
+        ids: list = None,
+        non_overlapping: bool = False,
+    ):
+        """
+        Random obstacle positions in the environment.
+
+        Args:
+            range_low (list [x, y, theta]): Lower bound of the random range for the obstacle states. Default is [0, 0, -3.14].
+            range_high (list [x, y, theta]): Upper bound of the random range for the obstacle states. Default is [10, 10, 3.14].
+            ids (list): A list of IDs of objects for which to set random positions. Default is None.
+            non_overlapping (bool): If set, the obstacles that will be reset to random obstacles will not overlap with other obstacles. Default is False.
+        """
+        if ids is None:
+            ids = [obs.id for obs in self.obstacle_list]
+        if isinstance(range_low, list):
+            range_low = np.c_[range_low]
+
+        if isinstance(range_high, list):
+            range_high = np.c_[range_high]
+
+        selected_obs = [obs for obs in self.obstacle_list if obs.id in ids]
+        existing_obj = [obj for obj in self.objects if obj.id not in ids]
+
+        for obj in selected_obs:
+
+            if not non_overlapping:
+                obj.set_state(
+                    np.random.uniform(range_low, range_high, (3, 1)), init=True
+                )
+            else:
+                counter = 0
+
+                while counter < 100:
+                    obj.set_state(
+                        np.random.uniform(range_low, range_high, (3, 1)), init=True
+                    )
+
+                    if any([obj.check_collision(exi_obj) for exi_obj in existing_obj]):
+                        counter += 1
+                    else:
+                        existing_obj.append(obj)
+                        break
+
+        self._env_plot.clear_components("all", self.obstacle_list)
+        self._env_plot.draw_components("all", self.obstacle_list)
+
+    def random_polygon_shape(
+        self,
+        seed: Optional[int] = None,
+        center_range: list = [0, 0, 10, 10],
+        avg_radius_range: list = [0.1, 1],
+        irregularity_range: list = [0, 1],
+        spikeyness_range: list = [0, 1],
+        num_vertices_range: list = [4, 10],
+    ):
+        """
+        Random polygon shapes for the obstacles in the environment.
+
+        Args:
+            seed (int or None): Random seed for reproducibility per obstacle (default None).
+            center_range (list): Range of the center of the polygon. Default is [0, 0, 10, 10].
+            avg_radius_range (list): Range of the average radius of the polygon. Default is [0.1, 1].
+            irregularity_range (list): Range of the irregularity of the polygon. Default is [0, 1].
+            spikeyness_range (list): Range of the spikeyness of the polygon. Default is [0, 1].
+            num_vertices_range (list): Range of the number of vertices of the polygon. Default is [4, 10].
+
+            center (Tuple[float, float]):
+                a pair representing the center of the circumference used
+                to generate the polygon.
+            avg_radius (float):
+                the average radius (distance of each generated vertex to
+                the center of the circumference) used to generate points
+                with a normal distribution.
+            irregularity (float): 0 - 1
+                variance of the spacing of the angles between consecutive
+                vertices.
+            spikeyness (float): 0 - 1
+                variance of the distance of each vertex to the center of
+                the circumference.
+            num_vertices (int):
+                the number of vertices of the polygon.
+        """
+
+        vertices_list = random_generate_polygon(
+            self.obstacle_number,
+            seed,
+            center_range,
+            avg_radius_range,
+            irregularity_range,
+            spikeyness_range,
+            num_vertices_range,
+        )
+
+        for i, obj in enumerate(self.obstacle_list):
+
+            if obj.shape == "polygon":
+                geom = Polygon(vertices_list[i])
+                obj.set_init_geometry(geom)
+
+        self._env_plot.clear_components("all", self.obstacle_list)
+        self._env_plot.draw_components("all", self.obstacle_list)
+
+    # endregion: environment change
+
+
+    # region: object operation
+
+    def add_object(self, obj: ObjectBase):
+        """
+        Add the object to the environment.
+        """
+        self._objects.append(obj)
+    
+    def add_objects(self, objs: list):
+        """
+        Add the objects to the environment.
+        """
+        self._objects.extend(objs)
+
+
+    def delete_object(self, target_id: int):
+        """
+        Delete the object with the given id.
+        """
+
+        for obj in self._objects:
+            if obj.id == target_id:
+                obj.plot_clear()
+                self._objects.remove(obj)
+                break
+    
+    def delete_objects(self, target_ids: list):
+        """
+        Delete the objects with the given ids.
+        """
+
+        del_obj = [obj for obj in self._objects if obj.id in target_ids]
+
+        for obj in del_obj:
+            obj.plot_clear()
+            self._objects.remove(obj)
+
+    # endregion: object operation
+
+
+
+    # region: get information
+
+    def get_robot_state(self):
+        """
+        Get the current state of the robot.
+
+        Returns:
+            state: 3*1 vector [x, y, theta]
+
+        """
+
+        return self.robot._state
+
+    def get_lidar_scan(self, id: int = 0):
+        """
+        Get the lidar scan of the robot with the given id.
+
+        Args:
+            id (int): Id of the robot.
+
+        Returns:
+            Dict: Dict of lidar scan points, see :py:meth:`.world.sensors.lidar2d.Lidar2D.get_scan` for detail.
+        """
+
+        return self.robot_list[id].get_lidar_scan()
+
+    def get_lidar_offset(self, id: int = 0):
+        """
+        Get the lidar offset of the robot with the given id.
+
+
+        Args:
+            id (int): Id of the robot.
+
+        Returns:
+            list of float: Lidar offset of the robot, [x, y, theta]
+        """
+
+        return self.robot_list[id].get_lidar_offset()
+
+    def get_obstacle_info_list(self):
+        """
+        Get the information of the obstacles in the environment.
+
+        Returns:
+            list of dict: List of obstacle information, see :py:meth:`.ObjectBase.get_obstacle_info` for detail.
+        """
+
+        return [
+            obj.get_obstacle_info() for obj in self.obstacle_list
+        ]
+
+    def get_robot_info(self, id: int = 0):
+        """
+        Get the information of the robot with the given id.
+
+        Args:
+            id (int): Id of the robot.
+
+        Returns:
+            see :py:meth:`.ObjectBase.get_info` for detail
+        """
+
+        return self.robot_list[id].get_info()
+    
+    def get_target_info(self, id: int = 0):
+        """
+        Get the information of the target with the given id.
+
+        Args:
+            id (int): Id of the target.
+
+        Returns:
+            see :py:meth:`.ObjectBase.get_info` for detail
+        """
+        # print("human list:", self.human_list)
+        return self.target_list[id].get_info()
+
+    def get_robot_info_list(self):
+        """
+        Get the information of the robots in the environment.
+
+        Returns:
+            list of dict: List of robot information, see :py:meth:`.ObjectBase.get_info` for detail.
+        """
+
+        return [obj.get_info() for obj in self.robot_list]
+
+    # endregion: get information
+
+    def save_figure(
+        self, save_name: str = None, include_index: bool = False, save_gif: bool = False, **kwargs
+    ):
+        """
+        Save the current figure.
+        Args:
+            save_name: Name of the file with format to save the figure.
+            **kwargs: Additional keyword arguments for saving the figure, see `savefig <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.savefig.html>`_ function for detail.
+        """
+        file_save_name = save_name or self._world.name + ".png"
+
+        file_name, file_format = file_save_name.split(".")
+
+        self._env_plot.save_figure(
+            file_name, file_format, include_index, save_gif, **kwargs
+        )
+
+    # region: property
+
+    def load_behavior(self, behaviors: str = "behavior_methods"):
+        """
+        Load behavior parameters from the script. Please refer to the behavior_methods.py file for more details.
+        Please make sure the python file is placed in the same folder with the implemented script.
+
+        Args:
+            behaviors (str): name of the bevavior script.
+        """
+
+        try:
+            importlib.import_module(behaviors)
+        except ImportError as e:
+            print(f"Failed to load module '{behaviors}': {e}")
+
+    @property
+    def arrive(self, id: Optional[int] = None, mode: Optional[str] = None):
+        """
+        Check if the robot(s) have arrived at their destination.
+
+        Args:
+            id (int, optional): Id of the specific robot to check. Default is None.
+            mode (str, optional): Mode to check for all or any robots. Must be 'all' or 'any'. Default is None.
+
+        Returns:
+            bool: Arrival status of the specified robot or all/any robots.
+        """
+
+        # If a specific robot id is provided
+        if id is not None:
+            # Ensure the id is an integer
+            assert isinstance(id, int), "id should be integer"
+            # Return the arrival status of the specified robot
+            return self.robot_list[id].arrive
+        else:
+            # Ensure the mode is either 'all' or 'any'
+            assert mode in ["all", "any"], "mode should be all or any"
+            # Return True if all robots have arrived, otherwise return True if any robot has arrived
+            return (
+                all([obj.arrive for obj in self.robot_list])
+                if mode == "all"
+                else any([obj.arrive for obj in self.robot_list])
+            )
+
+    @property
+    def check_collision(self, id: Optional[int] = None, mode: Optional[str] = None):
+        """
+        Check if the robot(s) have collided.
+
+        Args:
+            id (int, optional): Id of the specific robot to check. Default is None.
+            mode (str, optional): Mode to check for all or any robots. Must be 'all' or 'any'. Default is None.
+
+        Returns:
+            bool: Collision status of the specified robot or all/any robots.
+        """
+
+        # If a specific robot id is provided
+        if id is not None:
+            # Ensure the id is an integer
+            assert isinstance(id, int), "id should be integer"
+            # Return the collision status of the specified robot
+            return self.robot_list[id].collision
+        else:
+            # Ensure the mode is either 'all' or 'any'
+            assert mode in ["all", "any"], "mode should be all or any"
+            # Return True if all robots have collided, otherwise return True if any robot has collided
+            return (
+                all([obj.collision for obj in self.robot_list])
+                if mode == "all"
+                else any([obj.collision for obj in self.robot_list])
+            )
+
+    @property
+    def check_target_visible(self):
+        """
+        Check if the target is visible to the robot.
+
+        Returns:
+            bool: True if the target is visible, False otherwise.
+        """
+        target_visible = False
+        visible_objs = self.robot_list[0].get_visible_objects()
+        for vis_obj in visible_objs:
+            if vis_obj.role == "target":
+                target_visible = True
+                break
+        return target_visible
+
+    @property
+    def robot_list(self):
+        """
+        Get the list of robots in the environment.
+
+        Returns:
+            list: List of robot objects [].
+        """
+
+        return [obj for obj in self.objects if obj.role == "robot"]
+
+    @property
+    def obstacle_list(self):
+        """
+        Get the list of obstacles in the environment.
+
+        Returns:
+            list: List of obstacle objects.
+        """
+        return [obj for obj in self.objects if obj.role == "obstacle"]
+    
+    @property
+    def human_list(self):
+        """
+        Get the list of humans in the environment.
+
+        Returns:
+            list: List of human objects.
+        """
+        return [obj for obj in self.objects if obj.role == "human"]
+
+    @property
+    def visible_object_list(self):
+        """
+        Get the list of humans in the environment.
+
+        Returns:
+            list: List of human objects.
+        """
+        return self.robot_list[0].get_visible_objects()
+
+    
+    @property
+    def target_list(self):
+        """
+        Get the list of target humans in the environment.
+
+        Returns:
+            list: List of target objects.
+        """
+        return [obj for obj in self.objects if obj.role == "target"]
+
+    @property
+    def objects(self):
+        return self._objects
+
+    @property
+    def step_time(self):
+        return self._world.step_time
+
+    @property
+    def robot(self):
+        return self.robot_list[0]
+    
+    @property
+    def target(self):
+        return self.target_list[0]
+
+    @property
+    def obstacle_number(self):
+        return len(self.obstacle_list)
+    
+    @property
+    def human_number(self):
+        return len(self.human_list)
+    
+    @property
+    def target_number(self):
+        return len(self.target_list)
+
+    @property
+    def robot_number(self):
+        return len(self.robot_list)
+
+    # endregion: property
+
+    # region: keyboard control
+
+    def _on_press(self, key):
+        """
+        Handle key press events for keyboard control.
+
+        Args:
+            key (pynput.keyboard.Key): The key that was pressed.
+        """
+
+        try:
+            if key.char.isdigit() and self.alt_flag:
+
+                if int(key.char) >= self.robot_number:
+                    print("out of number of robots")
+                    self.key_id = int(key.char)
+                else:
+                    print("current control id: ", int(key.char))
+                    self.key_id = int(key.char)
+
+            if key.char == "w":
+                self.key_lv = self.key_lv_max
+            if key.char == "s":
+                self.key_lv = -self.key_lv_max
+            if key.char == "a":
+                self.key_ang = self.key_ang_max
+            if key.char == "d":
+                self.key_ang = -self.key_ang_max
+
+            self.key_vel = np.array([[self.key_lv], [self.key_ang]])
+
+        except AttributeError:
+
+            try:
+                if "alt" in key.name:
+                    self.alt_flag = True
+
+            except AttributeError:
+
+                if key.char.isdigit() and self.alt_flag:
+
+                    if int(key.char) >= self.robot_number:
+                        print("out of number of robots")
+                        self.key_id = int(key.char)
+                    else:
+                        print("current control id: ", int(key.char))
+                        self.key_id = int(key.char)
+
+    def _on_release(self, key):
+        """
+        Handle key release events for keyboard control.
+
+        Args:
+            key (pynput.keyboard.Key): The key that was released.
+        """
+
+        try:
+            if key.char == "w":
+                self.key_lv = 0
+            if key.char == "s":
+                self.key_lv = 0
+            if key.char == "a":
+                self.key_ang = 0
+            if key.char == "d":
+                self.key_ang = 0
+            if key.char == "q":
+                self.key_lv_max = self.key_lv_max - 0.2
+                print("current linear velocity", self.key_lv_max)
+            if key.char == "e":
+                self.key_lv_max = self.key_lv_max + 0.2
+                print("current linear velocity", self.key_lv_max)
+
+            if key.char == "z":
+                self.key_ang_max = self.key_ang_max - 0.2
+                print("current angular velocity ", self.key_ang_max)
+            if key.char == "c":
+                self.key_ang_max = self.key_ang_max + 0.2
+                print("current angular velocity ", self.key_ang_max)
+
+            if key.char == "r":
+                print("reset the environment")
+                self.reset()
+
+            self.key_vel = np.array([[self.key_lv], [self.key_ang]])
+
+        except AttributeError:
+            if "alt" in key.name:
+                self.alt_flag = False
+
+    # endregion:keyboard control
