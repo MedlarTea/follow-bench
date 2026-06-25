@@ -206,14 +206,3 @@ This benchmark is built on top of two MIT-licensed open-source projects by
 
 We gratefully thank the authors of both projects. Per-component provenance
 is documented in [`socialRPF/NOTICE.md`](socialRPF/NOTICE.md).
-
-## Citation
-
-```bibtex
-@article{ye2025follow,
-  title={Follow-Bench: A Unified Motion Planning Benchmark for Socially-Aware Robot Person Following},
-  author={Ye, Hanjing and Situ, Weixi and Peng, Jianwei and Zhan, Yu and Xia, Bingyi and Cai, Kuanqi and Zhang, Hong},
-  journal={arXiv preprint arXiv:2509.10796},
-  year={2025}
-}
-```
