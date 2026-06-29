@@ -54,6 +54,7 @@ ALL_PLANNERS=(
     "dwa_improved_planner_diff"
     "sfm_planner_diff"
     "bso_hfc_planner_diff"
+    "adap_rpf_diff"
     "RL_diff"
 )
 

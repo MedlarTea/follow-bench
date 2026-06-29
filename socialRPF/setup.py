@@ -37,6 +37,7 @@ setup(
         'BSO_HFC_planner', 'BSO_HFC_planner.*',
         'DWA_planner', 'DWA_planner.*',
         'SFM_planner', 'SFM_planner.*',
+        'Adap_RPF', 'Adap_RPF.*',
         'traj_predictor', 'traj_predictor.*',
         'follow_ahead_reaction', 'follow_ahead_reaction.*',
     ]),
@@ -52,11 +53,13 @@ setup(
         'scipy>=1.13',
         'osqp',
         'matplotlib',
+        'numba>=0.65.1',
         # --- Curve generation / IO / utilities ---
         'gctl==1.2',
         'pyyaml',
         'imageio',
         'tqdm',
+        'sobol-seq>=0.2.0',
         # --- Perception ---
         'opencv-python',
         'scikit-learn',
@@ -66,6 +69,7 @@ setup(
         # torch>=2.3 is required for stable-baselines3 2.8.x compatibility.
         'torch>=2.3,<3',
         'torchvision>=0.18',
+        'pytorch_mppi>=0.9.1',
         'stable-baselines3==2.8.0',
         'treelib',
         'gymnasium',

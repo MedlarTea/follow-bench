@@ -36,6 +36,7 @@ cd "$ROOT/socialRPF/example/robot_person_following"
 python rda_planner_diff.py -c "$DYNAMIC_CONFIG_DIR" -s NormalPerpendicularOrcaH10W0 -p back -d 1.5 -m 800 -l "$LOG_DIR" -i 1
 
 # python sfm_planner_diff.py -c "$DYNAMIC_CONFIG_DIR" -s NormalPerpendicularOrcaH10W0 -p left_side -d 1.5 -m 800 -l "$LOG_DIR" -i 1
+# python adap_rpf_diff.py -c "$DYNAMIC_CONFIG_DIR" -s NormalPerpendicularOrcaH10W0 -p back -d 1.5 -m 200 -l "$LOG_DIR" -i 1 --headless
 
 # ---- static layout demo ---------------------------------------------------
 # Available scenarios (examples): ClutterOrcaObs30H10, CorridorOrcaH20W5.6,
